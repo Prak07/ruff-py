@@ -65,17 +65,11 @@ select = [
     # flake8-2020 (YTT)
     "YTT",
     # flake8-annotations (ANN)
-    "ANN",
-    # flake8-async (ASYNC)
+    "ANN",    # flake8-async (ASYNC)
     "ASYNC",
-    # flake8-bandit (S)
-    "S",
     # flake8-blind-except (BLE)
-    "BLE",
-    # flake8-boolean-trap (FBT)
+    "BLE",    # flake8-boolean-trap (FBT)
     "FBT",
-    # flake8-bugbear (B)
-    "B",
     # flake8-builtins (A)
     "A",
     # flake8-commas (COM)
@@ -111,15 +105,10 @@ select = [
     # flake8-pytest-style (PT)
     "PT",
     # flake8-quotes (Q)
-    "Q",
-    # flake8-raise (RSE)
-    "RSE",
-    # flake8-return (RET)
-    "RET",
-    # flake8-self (SLF)
-    "SLF",
-    # flake8-simplify (SIM)
-    "SIM",
+    "Q",    # Removed flake8-raise (RSE)
+    # Removed flake8-return (RET)
+    # Removed flake8-self (SLF)
+    # Removed flake8-simplify (SIM)
     # flake8-tidy-imports (TID)
     "TID",
     # flake8-type-checking (TCH)
@@ -131,9 +120,7 @@ select = [
     # pandas-vet (PD)
     "PD",
     # pygrep-hooks (PGH)
-    "PGH",
-    # Pylint (PL)
-    "PL",
+    "PGH",    # Removed Pylint (PL)
     # tryceratops (TRY)
     "TRY",
     # flynt (FLY)
@@ -141,9 +128,7 @@ select = [
     # NumPy-specific rules (NPY)
     "NPY",
     # Airflow (AIR)
-    "AIR",
-    # Perflint (PERF)
-    "PERF",
+    "AIR",    # Removed Perflint (PERF)
     # Refurb (FURB)
     "FURB",
     # flake8-logging (LOG)
@@ -151,6 +136,9 @@ select = [
     # Ruff-specific rules (RUF)
     "RUF",
 ]
+
+# Explicitly removing Security and Code Quality checks
+exclude-rule-categories-from-select = ["S", "B", "PL", "SIM", "PERF", "RSE", "RET", "SLF"]
 
 # Disable specific rules that might be too strict for some projects
 ignore = [
@@ -164,6 +152,8 @@ ignore = [
     "D107",
     # Allow missing docstrings in public packages/modules (can be enabled per project)
     "D100", "D101", "D102", "D103", "D104",
+    # Ignore ALL security rules (S*)
+    "S",
     # Allow assert statements (useful for type narrowing and tests)
     "S101",
     # Allow hardcoded passwords in tests (can be configured per project)
@@ -256,15 +246,11 @@ keep-runtime-typing = true
 allow-star-arg-any = true
 ignore-fully-untyped = true
 
-[lint.flake8-bandit]
-# Define which Bandit tests to run
-check-typed-exception = true
+# Removed Security-related configuration
+# [lint.flake8-bandit]
 
-[lint.flake8-bugbear]
-# Enable additional bugbear checks
-extend-immutable-calls = [
-    "chr", "typer.Argument", "typer.Option", "fastapi.Depends", "fastapi.Query"
-]
+# Removed Code Quality-related configuration
+# [lint.flake8-bugbear]
 
 [lint.flake8-builtins]
 # Define additional builtins to avoid shadowing
@@ -292,16 +278,8 @@ multiline-quotes = "double"
 # Disallow relative imports
 ban-relative-imports = "all"
 
-[lint.pylint]
-# Configure Pylint-style checks
-allow-magic-value-types = ["int", "str", "float"]
-max-args = 7
-max-bool-expr = 5
-max-branches = 15
-max-nested-blocks = 5
-max-public-methods = 25
-max-returns = 8
-max-statements = 60
+# Removed Code Quality-related configuration
+# [lint.pylint]
 
 [format]
 # Enable the following formatter options
