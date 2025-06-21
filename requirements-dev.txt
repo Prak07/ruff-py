@@ -1,0 +1,68 @@
+# Development dependencies for enhanced code quality and testing
+# Install with: pip install -r requirements-dev.txt
+
+# Core requirements (from requirements.txt)
+pyright
+ruff
+
+# Testing framework and plugins
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0
+pytest-mock>=3.10.0
+pytest-asyncio>=0.21.0
+pytest-timeout>=2.1.0
+
+# Code quality and security
+bandit[toml]>=1.7.0
+safety>=2.3.0
+pip-audit>=2.6.0
+
+# Pre-commit hooks
+pre-commit>=3.0.0
+
+# Type checking enhancements
+mypy>=1.0.0
+types-requests
+types-setuptools
+
+# Documentation tools
+pydocstyle[toml]>=6.3.0
+sphinx>=6.0.0
+sphinx-rtd-theme>=1.2.0
+
+# Development utilities
+ipython>=8.0.0
+ipdb>=0.13.0
+rich>=13.0.0
+click>=8.0.0
+
+# Performance profiling
+memory-profiler>=0.60.0
+line-profiler>=4.0.0
+
+# Build tools
+build>=0.10.0
+twine>=4.0.0
+wheel>=0.40.0
+
+# Coverage reporting
+coverage[toml]>=7.0.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# HTTP testing (if applicable)
+httpx>=0.24.0
+responses>=0.23.0
+
+# Database testing utilities (if applicable)
+pytest-postgresql>=5.0.0
+pytest-mock-resources>=2.9.0
+
+# Linting and formatting alternatives/supplements
+vulture>=2.7.0  # Find dead code
+coherence>=0.7.0  # Check import coherence
+
+# Documentation and README tools
+grip>=4.6.0  # Preview markdown files

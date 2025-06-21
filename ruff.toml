@@ -1,0 +1,316 @@
+# Ruff configuration for production-level Python code quality
+# https://docs.astral.sh/ruff/
+
+# Exclude common directories that shouldn't be linted
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+    ".pytest_cache",
+]
+
+# Set the maximum line length to match Black's default
+line-length = 88
+
+# Set the minimum Python version to support
+target-version = "py310"
+
+# Enable auto-fixing for all fixable rules
+fix = true
+
+# Show fixes in the output
+show-fixes = true
+
+# Group violations by containing file
+output-format = "grouped"
+
+[lint]
+# Enable a comprehensive set of rules for production code
+select = [
+    # Pyflakes (F)
+    "F",
+    # pycodestyle errors (E)
+    "E",
+    # pycodestyle warnings (W)
+    "W",
+    # mccabe complexity (C90)
+    "C90",
+    # isort (I)
+    "I",
+    # pep8-naming (N)
+    "N",
+    # pydocstyle (D)
+    "D",
+    # pyupgrade (UP)
+    "UP",
+    # flake8-2020 (YTT)
+    "YTT",
+    # flake8-annotations (ANN)
+    "ANN",
+    # flake8-async (ASYNC)
+    "ASYNC",
+    # flake8-bandit (S)
+    "S",
+    # flake8-blind-except (BLE)
+    "BLE",
+    # flake8-boolean-trap (FBT)
+    "FBT",
+    # flake8-bugbear (B)
+    "B",
+    # flake8-builtins (A)
+    "A",
+    # flake8-commas (COM)
+    "COM",
+    # flake8-comprehensions (C4)
+    "C4",
+    # flake8-datetimez (DTZ)
+    "DTZ",
+    # flake8-debugger (T10)
+    "T10",
+    # flake8-django (DJ)
+    "DJ",
+    # flake8-errmsg (EM)
+    "EM",
+    # flake8-executable (EXE)
+    "EXE",
+    # flake8-future-annotations (FA)
+    "FA",
+    # flake8-implicit-str-concat (ISC)
+    "ISC",
+    # flake8-import-conventions (ICN)
+    "ICN",
+    # flake8-logging-format (G)
+    "G",
+    # flake8-no-pep420 (INP)
+    "INP",
+    # flake8-pie (PIE)
+    "PIE",
+    # flake8-print (T20)
+    "T20",
+    # flake8-pyi (PYI)
+    "PYI",
+    # flake8-pytest-style (PT)
+    "PT",
+    # flake8-quotes (Q)
+    "Q",
+    # flake8-raise (RSE)
+    "RSE",
+    # flake8-return (RET)
+    "RET",
+    # flake8-self (SLF)
+    "SLF",
+    # flake8-simplify (SIM)
+    "SIM",
+    # flake8-tidy-imports (TID)
+    "TID",
+    # flake8-type-checking (TCH)
+    "TCH",
+    # flake8-unused-arguments (ARG)
+    "ARG",
+    # flake8-use-pathlib (PTH)
+    "PTH",
+    # pandas-vet (PD)
+    "PD",
+    # pygrep-hooks (PGH)
+    "PGH",
+    # Pylint (PL)
+    "PL",
+    # tryceratops (TRY)
+    "TRY",
+    # flynt (FLY)
+    "FLY",
+    # NumPy-specific rules (NPY)
+    "NPY",
+    # Airflow (AIR)
+    "AIR",
+    # Perflint (PERF)
+    "PERF",
+    # Refurb (FURB)
+    "FURB",
+    # flake8-logging (LOG)
+    "LOG",
+    # Ruff-specific rules (RUF)
+    "RUF",
+]
+
+# Disable specific rules that might be too strict for some projects
+ignore = [
+    # Allow non-lowercase argument names (sometimes needed for APIs)
+    "N803",
+    # Allow non-lowercase variable names in functions
+    "N806",
+    # Allow missing docstrings for magic methods
+    "D105",
+    # Allow missing docstrings for __init__ methods
+    "D107",
+    # Allow missing docstrings in public packages/modules (can be enabled per project)
+    "D100", "D101", "D102", "D103", "D104",
+    # Allow assert statements (useful for type narrowing and tests)
+    "S101",
+    # Allow hardcoded passwords in tests (can be configured per project)
+    "S105", "S106",
+    # Allow subprocess without shell=False explicitly
+    "S602",
+    # Allow try-except-pass (sometimes necessary)
+    "S110",
+    # Allow boolean trap in function definition (sometimes needed for APIs)
+    "FBT001", "FBT002",
+    # Allow print statements (useful for CLI tools and debugging)
+    "T201",
+    # Allow todos in comments
+    "T000",
+    # Allow relative imports
+    "TID252",
+    # Too many arguments
+    "PLR0913",
+    # Too many return statements
+    "PLR0911",
+    # Too many branches
+    "PLR0912",
+    # Too many statements
+    "PLR0915",
+    # Magic value used in comparison
+    "PLR2004",
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+
+# Avoid trying to fix these violations
+unfixable = [
+    # Don't remove unused imports automatically (might break code)
+    "F401",
+    # Don't remove unused variables automatically
+    "F841",
+]
+
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.per-file-ignores]
+# Allow print statements and assert statements in test files
+"**/test_*.py" = ["T201", "S101", "D", "ANN", "PLR2004"]
+"**/*_test.py" = ["T201", "S101", "D", "ANN", "PLR2004"]
+"**/tests/*.py" = ["T201", "S101", "D", "ANN", "PLR2004"]
+"**/conftest.py" = ["T201", "S101", "D", "ANN"]
+
+# Allow print statements and missing docstrings in scripts and CLI tools
+"**/scripts/*.py" = ["T201", "D"]
+"**/cli/*.py" = ["T201", "D"]
+"**/__main__.py" = ["T201", "D"]
+
+# Allow missing docstrings and type annotations in migrations
+"**/migrations/*.py" = ["D", "ANN"]
+
+# Settings for specific rules
+[lint.mccabe]
+# Set maximum cyclomatic complexity
+max-complexity = 10
+
+[lint.pydocstyle]
+# Use Google docstring convention
+convention = "google"
+
+[lint.isort]
+# Configure import sorting
+case-sensitive = true
+combine-as-imports = true
+force-single-line = false
+force-wrap-aliases = true
+known-first-party = []
+known-local-folder = []
+known-third-party = []
+lines-after-imports = 2
+no-lines-before = ["future", "standard-library"]
+order-by-type = true
+relative-imports-order = "closest-to-furthest"
+required-imports = []
+single-line-exclusions = ["os", "sys"]
+split-on-trailing-comma = true
+
+[lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`
+keep-runtime-typing = true
+
+[lint.flake8-annotations]
+# Allow missing type annotations for self and cls
+allow-star-arg-any = true
+ignore-fully-untyped = true
+
+[lint.flake8-bandit]
+# Define which Bandit tests to run
+check-typed-exception = true
+
+[lint.flake8-bugbear]
+# Enable additional bugbear checks
+extend-immutable-calls = [
+    "chr", "typer.Argument", "typer.Option", "fastapi.Depends", "fastapi.Query"
+]
+
+[lint.flake8-builtins]
+# Define additional builtins to avoid shadowing
+builtins-ignorelist = ["id", "input", "open", "type"]
+
+[lint.flake8-comprehensions]
+# Allow dict comprehensions to rewrite as dict calls
+allow-dict-calls-with-keyword-arguments = true
+
+[lint.flake8-pytest-style]
+# Configure pytest style checks
+fixture-parentheses = false
+mark-parentheses = false
+parametrize-names-type = "tuple"
+parametrize-values-row-type = "tuple"
+parametrize-values-type = "list"
+
+[lint.flake8-quotes]
+# Use double quotes for strings
+docstring-quotes = "double"
+inline-quotes = "double"
+multiline-quotes = "double"
+
+[lint.flake8-tidy-imports]
+# Disallow relative imports
+ban-relative-imports = "all"
+
+[lint.pylint]
+# Configure Pylint-style checks
+allow-magic-value-types = ["int", "str", "float"]
+max-args = 7
+max-bool-expr = 5
+max-branches = 15
+max-nested-blocks = 5
+max-public-methods = 25
+max-returns = 8
+max-statements = 60
+
+[format]
+# Enable the following formatter options
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+# Respect magic trailing commas
+magic-trailing-comma = "respect"

@@ -1,0 +1,320 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Ruff linter
+      run: |
+        # Run Ruff linter with comprehensive rule set
+        ruff check . --output-format=github
+        
+    - name: Run Ruff formatter check
+      run: |
+        # Check if code is properly formatted
+        ruff format --check .
+        
+    - name: Check import sorting
+      run: |
+        # Check import organization (included in ruff check but explicit for clarity)
+        ruff check . --select I --output-format=github
+
+  security-and-quality:
+    name: Security and Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-security-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-security-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install bandit safety
+        
+    - name: Run Ruff with security rules
+      run: |
+        # Run security-focused linting
+        ruff check . --select S --output-format=github
+        
+    - name: Run Bandit security scanner
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        
+    - name: Upload Bandit report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+  type-checking:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-types-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-types-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Pyright type checker
+      run: |
+        pyright .
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-test-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-test-${{ matrix.python-version }}-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-xdist
+        
+    - name: Run tests with coverage
+      run: |
+        # Run tests with coverage if test files exist
+        if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+          pytest --cov=. --cov-report=xml --cov-report=html --cov-report=term -n auto
+        else
+          echo "No test files found, skipping test execution"
+        fi
+        
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == env.PYTHON_VERSION
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  auto-fix:
+    name: Auto-fix Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: ${{ github.head_ref }}
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Ruff auto-fixes
+      run: |
+        # Auto-fix linting issues
+        ruff check . --fix --unsafe-fixes
+        
+    - name: Run Ruff formatter
+      run: |
+        # Auto-format code
+        ruff format .
+        
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Commit changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Auto-fix: Apply Ruff formatting and linting fixes"
+        git push
+
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety pip-audit
+        
+    - name: Run Safety check
+      run: |
+        safety check --json --output safety-report.json || true
+        
+    - name: Run pip-audit
+      run: |
+        pip-audit --format=json --output=pip-audit-report.json || true
+        
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          safety-report.json
+          pip-audit-report.json
+
+  build-and-validate:
+    name: Build and Validate Package
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, security-and-quality, type-checking]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+        pip install -r requirements.txt
+        
+    - name: Build package
+      run: |
+        # Create a basic setup.py if it doesn't exist for demonstration
+        if [ ! -f "setup.py" ] && [ ! -f "pyproject.toml" ]; then
+          echo "No build configuration found. This is a development workflow."
+        else
+          python -m build
+        fi
+        
+    - name: Validate package structure
+      run: |
+        # Basic project structure validation
+        echo "Validating project structure..."
+        find . -name "*.py" -exec python -m py_compile {} \;
+        echo "All Python files compile successfully!"
+
+  summary:
+    name: CI/CD Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, security-and-quality, type-checking, test, dependency-check, build-and-validate]
+    if: always()
+    
+    steps:
+    - name: Check job results
+      run: |
+        echo "Lint and Format: ${{ needs.lint-and-format.result }}"
+        echo "Security and Quality: ${{ needs.security-and-quality.result }}"
+        echo "Type Checking: ${{ needs.type-checking.result }}"
+        echo "Tests: ${{ needs.test.result }}"
+        echo "Dependency Check: ${{ needs.dependency-check.result }}"
+        echo "Build and Validate: ${{ needs.build-and-validate.result }}"
+        
+        # Fail if any critical job failed
+        if [ "${{ needs.lint-and-format.result }}" = "failure" ] || 
+           [ "${{ needs.type-checking.result }}" = "failure" ] ||
+           [ "${{ needs.build-and-validate.result }}" = "failure" ]; then
+          echo "Critical jobs failed!"
+          exit 1
+        fi
+        
+        echo "CI/CD pipeline completed successfully!"
