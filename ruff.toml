@@ -177,7 +177,7 @@ ignore = [
     # Allow print statements (useful for CLI tools and debugging)
     "T201",
     # Allow todos in comments
-    "T000",
+    "FIX002",
     # Allow relative imports
     "TID252",
     # Too many arguments
@@ -310,7 +310,4 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 docstring-code-format = true
-docstring-code-line-length = "dynamic"
-
-# Respect magic trailing commas
-magic-trailing-comma = "respect"
+# docstring-code-line-length = "dynamic"
